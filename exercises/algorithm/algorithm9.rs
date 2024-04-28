@@ -36,7 +36,21 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        let mut idx = self.count;
+        loop {
+            let pidx = self.parent_idx(idx);
+            if pidx == 0 {
+                return;
+            }
+            if (self.comparator)(&self.items[idx], &self.items[pidx]) {
+                self.items.swap(idx, pidx);
+                idx = pidx;
+            } else {
+                return;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,7 +71,19 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-        0
+        let l = self.left_child_idx(idx);
+        if l > self.count {
+            return idx;
+        }
+        let r = self.right_child_idx(idx);
+        if r > self.count {
+            return l;
+        }
+        if (self.comparator)(&self.items[l], &self.items[r]) {
+            l
+        } else {
+            r
+        }
     }
 }
 
@@ -84,7 +110,29 @@ where
 
     fn next(&mut self) -> Option<T> {
         //TODO
-        None
+        if self.count == 0 {
+            return None;
+        }
+        self.items.swap(1, self.count);
+        let t = self.items.pop();
+        self.count -= 1;
+        if self.count <= 1 {
+            return t;
+        }
+        let mut idx = 1;
+        loop {
+            let cidx = self.smallest_child_idx(idx);
+            if idx == cidx {
+                break;
+            }
+            if (self.comparator)(&self.items[idx], &self.items[cidx]) {
+                break;
+            } else {
+                self.items.swap(idx, cidx);
+                idx = cidx;
+            }
+        }
+        t
     }
 }
 
